@@ -316,7 +316,6 @@ def get_suspended():
         return df
     except Exception as er:
         print(str(er))   
-            
 
 def _random(n=13):
     from random import randint
@@ -324,3 +323,26 @@ def _random(n=13):
     end = (10**n)-1
     return str(randint(start, end))  
 
+def get_index_constituent(index_name):
+    """
+    获取各种指数成份股
+    输入：'sh'|'sz'|'hs300'|'sz50'|'zz500'|'cyb'
+    Return
+    --------
+    DataFrame
+        code :股票代码
+        name :股票名称
+    """
+    try:
+        if index_name == 'sh' or index_name == 'hs300' or index_name == 'sz50' or index_name == 'zz500':
+            url = ct.SZ_CLASSIFY_URL_FTP%(ct.P_TYPE['http'],ct.DOMAINS['idx'],ct.PAGES[index_name])
+            ucols = [4, 5]
+        else:
+            url = ct.SZSE_CLASSIFY_URL_HTTP%(ct.P_TYPE['http'],ct.DOMAINS['szse'],ct.PAGES[index_name])
+            ucols = [0, 1]
+        wt = pd.read_excel(url, usecols=ucols)
+        wt.columns = ct.FOR_CLASSIFY_COLS
+        wt['code'] = wt['code'].map(lambda x :str(x).zfill(6))
+        return wt
+    except Exception as er:
+        print(str(er)) 
