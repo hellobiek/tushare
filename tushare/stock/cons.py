@@ -29,7 +29,8 @@ DOMAINS = {'sina': 'sina.com.cn', 'sinahq': 'sinajs.cn',
            'oss': 'file.tushare.org', 'idxip':'115.29.204.48',
            'shibor': 'www.shibor.org', 'mbox':'www.cbooo.cn',
            'tt': 'gtimg.cn', 'gw': 'gw.com.cn',
-           'v500': 'value500.com', 'sstar': 'stock.stockstar.com'}
+           'v500': 'value500.com', 'sstar': 'stock.stockstar.com',
+           'dfcf': 'nufm.dfcfw.com'}
 PAGES = {'fd': 'index.phtml', 
          'dl': 'downxls.php', 
          'jv': 'json_v2.php',
@@ -57,7 +58,10 @@ PAGES = {'fd': 'index.phtml',
          'dw': 'downLoad.html',
          'qmd':'queryMargin.do', 
          'szsefc':'ShowReport.szse',
-         'ssecq':'commonQuery.do', 
+         'ssecq':'commonQuery.do',
+         'infodis':'infodisplay',
+         'preszse':'main/disclosure/news/tfpts',
+         'ssesppq':'querySpecialTipsInfoByPage.do', 
          'sinadd':'cn_bill_download.php', 
          'ids_sw':'SwHy.php',
          'idx': 'index.php', 
@@ -125,7 +129,9 @@ SINA_BALANCESHEET_URL = 'http://money.finance.sina.com.cn/corp/go.php/vDOWN_Bala
 SINA_PROFITSTATEMENT_URL = 'http://money.finance.sina.com.cn/corp/go.php/vDOWN_ProfitStatement/displaytype/4/stockid/%s/ctrl/all.phtml'
 SINA_CASHFLOW_URL = 'http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/%s/ctrl/all.phtml'
 INDEX_C_COMM = 'sseportal/ps/zhs/hqjt/csi'
-HS300_CLASSIFY_URL_FTP = '%s%s/webdata/%s'
+HS300_CLASSIFY_URL_FTP = '%s%s/uploads/file/autofile/closeweight/%s'
+SZ_CLASSIFY_URL_FTP = '%s%s/uploads/file/autofile/cons/%s'
+SZSE_CLASSIFY_URL_HTTP = '%s%s/szseWeb/ShowReport.szse?SHOWTYPE=xlsx&CATALOGID=1747&ZSDM=%s&tab1PAGENO=1&ENCODE=1&TABKEY=tab1'
 HS300_CLASSIFY_URL_HTTP = '%s%s/%s/%s'
 BDI_URL = '%s%s/BDI.asp'
 HIST_FQ_URL = '%s%s/corp/go.php/vMS_FuQuanMarketHistory/stockid/%s.phtml?year=%s&jidu=%s'
@@ -352,6 +358,8 @@ MKTS = {
 'MA': [60,  3,'主力期货合约'],
 'ZZ': [62,  5,  '中证指数'],
 'GH': [71,  2,   '港股通'],
+'SZ': [0,   0, 'SHENZHEN'],
+'SH': [1,   1, 'SHANGHAI']
 }
 SLIST = ['180.153.18.170', '180.153.18.171', '202.108.253.130', '202.108.253.131', '60.191.117.167', '115.238.56.198', '218.75.126.9', '115.238.90.165',
              '124.160.88.183', '60.12.136.250', '218.108.98.244', '218.108.47.69', '14.17.75.71', '180.153.39.51']

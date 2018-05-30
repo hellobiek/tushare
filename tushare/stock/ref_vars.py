@@ -19,16 +19,21 @@ MAR_SZ_MX_URL = '%s%s/szseWeb/%s?SHOWTYPE=EXCEL&ACTIONID=8&CATALOGID=1837_xxpl&t
 MAR_SH_HZ_TAIL_URL = '&pageHelp.pageNo=%s&pageHelp.beginPage=%s&pageHelp.endPage=%s'
 TERMINATED_URL = '%s%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&sqlId=COMMON_SSE_ZQPZ_GPLB_MCJS_ZZSSGGJBXX_L&pageHelp.pageSize=50&_=%s'
 SUSPENDED_URL = '%s%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&sqlId=COMMON_SSE_ZQPZ_GPLB_MCJS_ZTSSGS_L&pageHelp.pageSize=50&_=%s'
+HALTED_SH_URL = '%s%s/%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&searchDate=%s&bgFlag=1&searchDo=1&pageHelp.pageSize=1500&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=5&_=%s'
+HALTED_SZ_URL = '%s%s/%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&searchDate=%s&bgFlag=1&searchDo=1&pageHelp.pageSize=1500&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=5&_=%s'
 TOP10_HOLDERS_URL = '%swebf10.%s/SDGD/SD%sGD%s.js'
 TOP10_SUMM_COLS = ['quarter', 'amount', 'changed' ,'props']
 TOP10_PER_COLS = ['quarter', 'name', 'hold', 'h_pro', 'sharetype', 'status']
 TERMINATED_T_COLS = ['COMPANY_CODE', 'COMPANY_ABBR', 'LISTING_DATE', 'CHANGE_DATE']
+HALTED_T_COLS = ['ROWNUM_', 'bulletinType', 'productCode', 'productName', 'seq', 'showDate', 'stopDate', 'stopReason', 'stopTime']
 LHB_KINDS = ['ggtj', 'yytj', 'jgzz', 'jgmx']
 LHB_GGTJ_COLS = ['code', 'name', 'count', 'bamount', 'samount', 'net', 'bcount', 'scount']
 LHB_YYTJ_COLS = ['broker', 'count', 'bamount', 'bcount', 'samount', 'scount', 'top3']
 LHB_JGZZ_COLS = ['code', 'name', 'bamount', 'bcount', 'samount', 'scount', 'net']
 LHB_JGMX_COLS = ['code', 'name', 'date', 'bamount', 'samount', 'type']
 TERMINATED_COLS = ['code', 'name', 'oDate', 'tDate']
+HALTED_COLS_SH = ['code', 'name', 'showDate', 'stopDate', 'stopReason', 'stopTime']
+HALTED_COLS_SZ = ['code', 'name', 'stopDate', 'openDate', 'stopPeriod', 'stopReason']
 DP_COLS = ['report_date', 'quarter', 'code', 'name', 'plan']
 DP_163_COLS = ['code', 'name', 'year', 'plan', 'report_date']
 XSG_COLS = ['code', 'name', 'date', 'count', 'ratio']

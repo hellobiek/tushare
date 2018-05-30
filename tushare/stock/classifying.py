@@ -9,6 +9,7 @@ Created on 2015/02/01
 """
 
 import pandas as pd
+from bs4 import BeautifulSoup
 from tushare.stock import cons as ct
 from tushare.stock import ref_vars as rv
 import json
@@ -177,7 +178,6 @@ def _get_detail(tag, retry_count=3, pause=0.001):
         if df.shape[0] < num_limit:
             return dfc
         #raise IOError(ct.NETWORK_URL_ERROR_MSG)
-    
 
 def _get_type_data(url):
     try:
@@ -259,69 +259,7 @@ def get_zz500s():
         df = df.reset_index()
         return pd.merge(df,wt)
     except Exception as er:
-        print(str(er)) 
-
-
-def get_terminated():
-    """
-    获取终止上市股票列表
-    Return
-    --------
-    DataFrame
-        code :股票代码
-        name :股票名称
-        oDate:上市日期
-        tDate:终止上市日期 
-    """
-    try:
-        
-        ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
-        clt = Client(rv.TERMINATED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
-                                    ct.PAGES['ssecq'], _random(5),
-                                    _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
-        lines = clt.gvalue()
-        lines = lines.decode('utf-8') if ct.PY3 else lines
-        lines = lines[19:-1]
-        lines = json.loads(lines)
-        df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
-        df.columns = rv.TERMINATED_COLS
-        return df
-    except Exception as er:
-        print(str(er))      
-
-
-def get_suspended():
-    """
-    获取暂停上市股票列表
-    Return
-    --------
-    DataFrame
-        code :股票代码
-        name :股票名称
-        oDate:上市日期
-        tDate:终止上市日期 
-    """
-    try:
-        
-        ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
-        clt = Client(rv.SUSPENDED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
-                                    ct.PAGES['ssecq'], _random(5),
-                                    _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
-        lines = clt.gvalue()
-        lines = lines.decode('utf-8') if ct.PY3 else lines
-        lines = lines[19:-1]
-        lines = json.loads(lines)
-        df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
-        df.columns = rv.TERMINATED_COLS
-        return df
-    except Exception as er:
-        print(str(er))   
-
-def _random(n=13):
-    from random import randint
-    start = 10**(n-1)
-    end = (10**n)-1
-    return str(randint(start, end))  
+        print(str(er))
 
 def get_index_constituent(index_name):
     """
@@ -346,3 +284,109 @@ def get_index_constituent(index_name):
         return wt
     except Exception as er:
         print(str(er)) 
+
+def get_terminated():
+    """
+    获取终止上市股票列表
+    Return
+    --------
+    DataFrame
+        code :股票代码
+        name :股票名称
+        oDate:上市日期
+        tDate:终止上市日期 
+    """
+    try:
+        ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
+        clt = Client(rv.TERMINATED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
+                                    ct.PAGES['ssecq'], _random(5),
+                                    _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
+        lines = clt.gvalue()
+        lines = lines.decode('utf-8') if ct.PY3 else lines
+        lines = lines[19:-1]
+        lines = json.loads(lines)
+        df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
+        df.columns = rv.TERMINATED_COLS
+        return df
+    except Exception as er:
+        print(str(er))
+
+def parse_jsonp(jsonp_str):
+    try:
+        return re.search('^[^(]*?\((.*)\)[^)]*$', jsonp_str).group(1)
+    except:
+        raise ValueError('Invalid JSONP')
+
+def get_halted(markets = ['sz', 'sh'], _date = None):
+    """
+    获取停牌的个股
+    Input
+        markets = ['sz', 'sh'] default is both sh and sz
+        date = '2018-05-04'
+    Return
+    --------
+    DataFrame
+        code : 股票代码
+        market : 证券交易所
+        name : 股票名称
+        showDate : 上市日期
+        stopDate : 终止上市日期 
+        stopReason : 终止上市日期 
+        stopTime : 停止方式
+    """
+    try:
+        _date = datetime.now().strftime('%Y-%m-%d') if _date is None else _date
+        for market in markets:
+            if market == 'sh':
+                url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), _date, _random())
+                ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
+                clt = Client(url, ref=ref, cookie=rv.MAR_SH_COOKIESTR)
+                lines = clt.gvalue()
+                lines = lines.decode('utf-8')
+                lines = json.loads(parse_jsonp(lines))
+                df = pd.DataFrame(lines['pageHelp']['data'], columns=rv.HALTED_T_COLS)
+                df = df[['productCode', 'productName', 'showDate', 'stopDate', 'stopReason', 'stopTime']]
+                df.columns = rv.HALTED_COLS_SH
+            else:
+                url = "https://www.szse.cn/main/disclosure/news/tfpts/"
+                html = urlopen(url).read()
+                soup = BeautifulSoup(html, "lxml")
+                table_html = soup.find(id="REPORTID_tab1")
+                df = pd.read_html(table_html.prettify())[0]
+                df.columns = rv.HALTED_COLS_SZ
+                df = df.drop([0], axis = 0)
+        return df
+    except Exception as er:
+        print(str(er)) 
+
+def get_suspended():
+    """
+    获取暂停上市股票列表
+    Return
+    --------
+    DataFrame
+        code :股票代码
+        name :股票名称
+        oDate:上市日期
+        tDate:终止上市日期 
+    """
+    try:
+        ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
+        clt = Client(rv.SUSPENDED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
+                                    ct.PAGES['ssecq'], _random(5),
+                                    _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
+        lines = clt.gvalue()
+        lines = lines.decode('utf-8') if ct.PY3 else lines
+        lines = lines[19:-1]
+        lines = json.loads(lines)
+        df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
+        df.columns = rv.TERMINATED_COLS
+        return df
+    except Exception as er:
+        print(str(er))   
+
+def _random(n=13):
+    from random import randint
+    start = 10**(n-1)
+    end = (10**n)-1
+    return str(randint(start, end))
