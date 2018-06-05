@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*- 
 
-__version__ = '1.0.5'
-__author__ = 'Jimmy Liu'
+__version__ = '1.0.5a'
+__author__ = 'Hellobiek'
 
 """
 for trading data
@@ -42,7 +42,7 @@ from tushare.stock.classifying import (get_industry_classified, get_concept_clas
                                        get_area_classified, get_gem_classified,
                                        get_sme_classified, get_st_classified,
                                        get_hs300s, get_sz50s, get_zz500s,
-                                       get_terminated, get_suspended)
+                                       get_terminated, get_suspended, get_halted)
 
 """
 for macro data
