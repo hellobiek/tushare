@@ -9,6 +9,8 @@ Created on 2015/02/01
 """
 
 import pandas as pd
+import datetime
+from datetime import datetime
 from bs4 import BeautifulSoup
 from tushare.stock import cons as ct
 from tushare.stock import ref_vars as rv
