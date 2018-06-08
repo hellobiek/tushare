@@ -287,7 +287,7 @@ def get_index_constituent(index_name):
     except Exception as er:
         print(str(er)) 
 
-def get_terminated():
+def get_terminated(markets = ['sz', 'sh']):
     """
     获取终止上市股票列表
     Return
@@ -296,20 +296,28 @@ def get_terminated():
         code :股票代码
         name :股票名称
         oDate:上市日期
-        tDate:终止上市日期 
+        tDate:终止上市日期
     """
     try:
-        ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
-        clt = Client(rv.TERMINATED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
-                                    ct.PAGES['ssecq'], _random(5),
-                                    _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
-        lines = clt.gvalue()
-        lines = lines.decode('utf-8') if ct.PY3 else lines
-        lines = lines[19:-1]
-        lines = json.loads(lines)
-        df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
-        df.columns = rv.TERMINATED_COLS
-        return df
+        res = None
+        for market in markets:
+            if market == 'sh':
+                ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
+                clt = Client(rv.TERMINATED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
+                                                ct.PAGES['ssecq'], _random(5),
+                                                _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
+                lines = clt.gvalue()
+                lines = lines.decode('utf-8') if ct.PY3 else lines
+                lines = lines[19:-1]
+                lines = json.loads(lines)
+                df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
+            else:
+                url = "http://www.szse.cn/szseWeb/ShowReport.szse?SHOWTYPE=xlsx&CATALOGID=1793_ssgs&ENCODE=1&TABKEY=tab2"
+                df = pd.read_excel(url, usecols=[0, 1, 2, 3])
+            df.columns = rv.TERMINATED_COLS
+            df['code'] = df['code'].map(lambda x :str(x).zfill(6))
+            res = df if res is None else res.append(df)
+        return res.reset_index(drop = True)
     except Exception as er:
         print(str(er))
 
@@ -319,28 +327,24 @@ def parse_jsonp(jsonp_str):
     except:
         raise ValueError('Invalid JSONP')
 
-def get_halted(markets = ['sz', 'sh'], _date = None):
+def get_halted(markets = ['sz', 'sh']):
     """
-    获取停牌的个股
+    获取当天停牌的个股
     Input
         markets = ['sz', 'sh'] default is both sh and sz
-        date = '2018-05-04'
     Return
     --------
     DataFrame
         code : 股票代码
         market : 证券交易所
         name : 股票名称
-        showDate : 上市日期
-        stopDate : 终止上市日期 
-        stopReason : 终止上市日期 
-        stopTime : 停止方式
+        stopReason : 终止上市日期
     """
     try:
-        _date = datetime.now().strftime('%Y-%m-%d') if _date is None else _date
+        res = None
         for market in markets:
             if market == 'sh':
-                url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), _date, _random())
+                url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), _random())
                 ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
                 clt = Client(url, ref=ref, cookie=rv.MAR_SH_COOKIESTR)
                 lines = clt.gvalue()
@@ -349,6 +353,7 @@ def get_halted(markets = ['sz', 'sh'], _date = None):
                 df = pd.DataFrame(lines['pageHelp']['data'], columns=rv.HALTED_T_COLS)
                 df = df[['productCode', 'productName', 'showDate', 'stopDate', 'stopReason', 'stopTime']]
                 df.columns = rv.HALTED_COLS_SH
+                df = df[~df.stopTime.str.contains('终止')]
             else:
                 url = "https://www.szse.cn/main/disclosure/news/tfpts/"
                 html = urlopen(url).read()
@@ -357,11 +362,16 @@ def get_halted(markets = ['sz', 'sh'], _date = None):
                 df = pd.read_html(table_html.prettify())[0]
                 df.columns = rv.HALTED_COLS_SZ
                 df = df.drop([0], axis = 0)
-        return df
+                df = df[df.stopDate.isnull().values==False]
+            df = df[['code', 'name', 'reason']]
+            df['market'] = market
+            df['date']   = datetime.now().strftime('%Y-%m-%d')
+            res = df if res is None else res.append(df)
+        return res.reset_index(drop = 'True')
     except Exception as er:
-        print(str(er)) 
+        print(str(er))
 
-def get_suspended():
+def get_suspended(markets = ['sz', 'sh']):
     """
     获取暂停上市股票列表
     Return
@@ -370,22 +380,30 @@ def get_suspended():
         code :股票代码
         name :股票名称
         oDate:上市日期
-        tDate:终止上市日期 
+        tDate:终止上市日期
     """
     try:
-        ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
-        clt = Client(rv.SUSPENDED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
-                                    ct.PAGES['ssecq'], _random(5),
-                                    _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
-        lines = clt.gvalue()
-        lines = lines.decode('utf-8') if ct.PY3 else lines
-        lines = lines[19:-1]
-        lines = json.loads(lines)
-        df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
-        df.columns = rv.TERMINATED_COLS
-        return df
+        res = None
+        for market in markets:
+            if market == 'sh':
+                ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
+                clt = Client(rv.SUSPENDED_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'],
+                                            ct.PAGES['ssecq'], _random(5),
+                                            _random()), ref=ref, cookie=rv.MAR_SH_COOKIESTR)
+                lines = clt.gvalue()
+                lines = lines.decode('utf-8') if ct.PY3 else lines
+                lines = lines[19:-1]
+                lines = json.loads(lines)
+                df = pd.DataFrame(lines['result'], columns=rv.TERMINATED_T_COLS)
+            else:
+                url = "http://www.szse.cn/szseWeb/ShowReport.szse?SHOWTYPE=xlsx&CATALOGID=1793_ssgs&ENCODE=1&TABKEY=tab1"
+                df = pd.read_excel(url, usecols=[0, 1, 2, 3])
+            df.columns = rv.TERMINATED_COLS
+            df['code'] = df['code'].map(lambda x :str(x).zfill(6))
+            res = df if res is None else res.append(df)
+        return res.reset_index(drop = True)
     except Exception as er:
-        print(str(er))   
+        print(str(er))
 
 def _random(n=13):
     from random import randint
