@@ -249,10 +249,6 @@ def get_zz500s():
     """
     from tushare.stock.fundamental import get_stock_basics
     try:
-#         df = pd.read_excel(ct.HS300_CLASSIFY_URL_FTP%(ct.P_TYPE['ftp'], ct.DOMAINS['idxip'], 
-#                                                   ct.PAGES['zz500b']), parse_cols=[0,1])
-#         df.columns = ct.FOR_CLASSIFY_B_COLS
-#         df['code'] = df['code'].map(lambda x :str(x).zfill(6))
         wt = pd.read_excel(ct.HS300_CLASSIFY_URL_FTP%(ct.P_TYPE['ftp'], ct.DOMAINS['idxip'], 
                                                    ct.PAGES['zz500wt']), parse_cols=[0, 3, 6])
         wt.columns = ct.FOR_CLASSIFY_W_COLS
@@ -286,6 +282,7 @@ def get_index_constituent(index_name):
         return wt
     except Exception as er:
         print(str(er)) 
+        return None
 
 def get_terminated(markets = ['sz', 'sh']):
     """
@@ -320,6 +317,7 @@ def get_terminated(markets = ['sz', 'sh']):
         return res.reset_index(drop = True)
     except Exception as er:
         print(str(er))
+        return None
 
 def parse_jsonp(jsonp_str):
     try:
@@ -342,9 +340,10 @@ def get_halted(markets = ['sz', 'sh']):
     """
     try:
         res = None
+        today = datetime.now().strftime('%Y-%m-%d')
         for market in markets:
             if market == 'sh':
-                url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), _random())
+                url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), today, _random())
                 ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
                 clt = Client(url, ref=ref, cookie=rv.MAR_SH_COOKIESTR)
                 lines = clt.gvalue()
@@ -363,13 +362,14 @@ def get_halted(markets = ['sz', 'sh']):
                 df.columns = rv.HALTED_COLS_SZ
                 df = df.drop([0], axis = 0)
                 df = df[df.stopDate.isnull().values==False]
-            df = df[['code', 'name', 'reason']]
+            df = df[['code', 'name', 'stopReason']]
             df['market'] = market
-            df['date']   = datetime.now().strftime('%Y-%m-%d')
+            df['date']   = today
             res = df if res is None else res.append(df)
         return res.reset_index(drop = 'True')
     except Exception as er:
         print(str(er))
+        return None
 
 def get_suspended(markets = ['sz', 'sh']):
     """
@@ -404,6 +404,7 @@ def get_suspended(markets = ['sz', 'sh']):
         return res.reset_index(drop = True)
     except Exception as er:
         print(str(er))
+        return None
 
 def _random(n=13):
     from random import randint

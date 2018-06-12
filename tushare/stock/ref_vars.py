@@ -20,7 +20,6 @@ MAR_SH_HZ_TAIL_URL = '&pageHelp.pageNo=%s&pageHelp.beginPage=%s&pageHelp.endPage
 TERMINATED_URL = '%s%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&sqlId=COMMON_SSE_ZQPZ_GPLB_MCJS_ZZSSGGJBXX_L&pageHelp.pageSize=50&_=%s'
 SUSPENDED_URL = '%s%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&sqlId=COMMON_SSE_ZQPZ_GPLB_MCJS_ZTSSGS_L&pageHelp.pageSize=50&_=%s'
 HALTED_SH_URL = '%s%s/%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&searchDate=%s&bgFlag=1&searchDo=1&pageHelp.pageSize=1500&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=5&_=%s'
-HALTED_SZ_URL = '%s%s/%s/%s?jsonCallBack=jsonpCallback%s&isPagination=true&searchDate=%s&bgFlag=1&searchDo=1&pageHelp.pageSize=1500&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=5&_=%s'
 TOP10_HOLDERS_URL = '%swebf10.%s/SDGD/SD%sGD%s.js'
 TOP10_SUMM_COLS = ['quarter', 'amount', 'changed' ,'props']
 TOP10_PER_COLS = ['quarter', 'name', 'hold', 'h_pro', 'sharetype', 'status']
