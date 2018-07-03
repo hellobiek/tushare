@@ -344,37 +344,6 @@ def get_halted(markets = ['sz', 'sh']):
         for market in markets:
             if market == 'sh':
                 url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), today, _random())
-                print(url)
-                ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
-                clt = Client(url, ref=ref, cookie=rv.MAR_SH_COOKIESTR)
-                lines = clt.gvalue()
-                lines = lines.decode('utf-8')
-                lines = json.loads(parse_jsonp(lines))
-                df = pd.DataFrame(lines['pageHelp']['data'], columns=rv.HALTED_T_COLS)
-                df = df[['productCode', 'productName', 'showDate', 'stopDate', 'stopReason', 'stopTime']]
-                df.columns = rv.HALTED_COLS_SH
-                df = df[~df.stopTime.str.contains('终止')]
-            else:
-                url = "http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1798&TABKEY=tab1&txtKsrq=%s&txtZzrq=%s&txtKsrq-txtZzrq=%s&random=%s" % (today, today, today, random.random())
-                html = urlopen(url).read()
-                soup = BeautifulSoup(html, "lxml")
-                table_html = soup.find("cols")
-                df = pd.read_html(table_html.prettify())[0]
-                df.columns = rv.HALTED_COLS_SZ
-                df = df.drop([0], axis = 0)
-                df = df[df.stopDate.isnull().values==False]
-            df = df[['code', 'name', 'stopReason']]
-            df['market'] = market
-            df['date']   = today
-            res = df if res is None else res.append(df)
-        return res.reset_index(drop = 'True')
-    try:
-            try:
-        res = None
-        today = datetime.now().strftime('%Y-%m-%d')
-        for market in markets:
-            if market == 'sh':
-                url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), today, _random())
                 ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
                 clt = Client(url, ref=ref, cookie=rv.MAR_SH_COOKIESTR)
                 lines = clt.gvalue()
@@ -401,7 +370,7 @@ def get_halted(markets = ['sz', 'sh']):
                 df.columns = rv.HALTED_COLS_SZ
             df['market'] = market
             res = df if res is None else res.append(df)
-        return res.reset_index(drop = 'True'
+        return res.reset_index(drop = 'True')
     except Exception as er:
         print(str(er))
         return None
