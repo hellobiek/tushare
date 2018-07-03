@@ -16,6 +16,7 @@ from tushare.stock import cons as ct
 from tushare.stock import ref_vars as rv
 import json
 import re
+import random
 from pandas.util.testing import _network_error_classes
 import time
 import tushare.stock.fundamental as fd
@@ -359,6 +360,7 @@ def get_halted(markets = ['sz', 'sh']):
                 html_data = json.loads(html)
                 obj_list = html_data[0]['data']
                 page_num = html_data[0]['metadata']['pagecount']
+                if 0 == page_num: continue
                 for page_index in range(page_num - 1):
                     url = "http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1798&TABKEY=tab1&PAGENO=%s&txtKsrq=%s&txtZzrq=%s&txtKsrq-txtZzrq=%s&random=%s" % (page_index + 2, today, today, today, random.random())
                     html = urlopen(url).read()
