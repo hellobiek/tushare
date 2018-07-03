@@ -344,6 +344,7 @@ def get_halted(markets = ['sz', 'sh']):
         for market in markets:
             if market == 'sh':
                 url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), today, _random())
+                print(url)
                 ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
                 clt = Client(url, ref=ref, cookie=rv.MAR_SH_COOKIESTR)
                 lines = clt.gvalue()
@@ -354,10 +355,10 @@ def get_halted(markets = ['sz', 'sh']):
                 df.columns = rv.HALTED_COLS_SH
                 df = df[~df.stopTime.str.contains('终止')]
             else:
-                url = "https://www.szse.cn/main/disclosure/news/tfpts/"
+                url = "http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1798&TABKEY=tab1&txtKsrq=%s&txtZzrq=%s&txtKsrq-txtZzrq=%s&random=%s" % (today, today, today, random.random())
                 html = urlopen(url).read()
                 soup = BeautifulSoup(html, "lxml")
-                table_html = soup.find(id="REPORTID_tab1")
+                table_html = soup.find("cols")
                 df = pd.read_html(table_html.prettify())[0]
                 df.columns = rv.HALTED_COLS_SZ
                 df = df.drop([0], axis = 0)
@@ -367,6 +368,40 @@ def get_halted(markets = ['sz', 'sh']):
             df['date']   = today
             res = df if res is None else res.append(df)
         return res.reset_index(drop = 'True')
+    try:
+            try:
+        res = None
+        today = datetime.now().strftime('%Y-%m-%d')
+        for market in markets:
+            if market == 'sh':
+                url = rv.HALTED_SH_URL%(ct.P_TYPE['http'], ct.DOMAINS['sseq'], ct.PAGES['infodis'], ct.PAGES['ssesppq'], _random(5), today, _random())
+                ref = ct.SSEQ_CQ_REF_URL%(ct.P_TYPE['http'], ct.DOMAINS['sse'])
+                clt = Client(url, ref=ref, cookie=rv.MAR_SH_COOKIESTR)
+                lines = clt.gvalue()
+                lines = lines.decode('utf-8')
+                lines = json.loads(parse_jsonp(lines))
+                df = pd.DataFrame(lines['pageHelp']['data'], columns=rv.HALTED_T_COLS)
+                df = df[['productCode', 'productName', 'showDate', 'stopDate', 'stopReason', 'stopTime']]
+                df.columns = rv.HALTED_COLS_SH
+            else:
+                url = "http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1798&TABKEY=tab1&txtKsrq=%s&txtZzrq=%s&txtKsrq-txtZzrq=%s&random=%s" % (today, today, today, random.random())
+                html = urlopen(url).read()
+                html = html.decode('utf-8')
+                html_data = json.loads(html)
+                obj_list = html_data[0]['data']
+                page_num = html_data[0]['metadata']['pagecount']
+                for page_index in range(page_num - 1):
+                    url = "http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=1798&TABKEY=tab1&PAGENO=%s&txtKsrq=%s&txtZzrq=%s&txtKsrq-txtZzrq=%s&random=%s" % (page_index + 2, today, today, today, random.random())
+                    html = urlopen(url).read()
+                    html = html.decode('utf-8')
+                    html_data = json.loads(html)
+                    tmp_list = html_data[0]['data']
+                    obj_list.extend(tmp_list)
+                df = pd.DataFrame(obj_list)
+                df.columns = rv.HALTED_COLS_SZ
+            df['market'] = market
+            res = df if res is None else res.append(df)
+        return res.reset_index(drop = 'True'
     except Exception as er:
         print(str(er))
         return None
