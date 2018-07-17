@@ -129,8 +129,7 @@ def _parsing_dayprice_json(types=None, page=1):
     return df
 
 
-def get_tick_data(code=None, date=None, retry_count=3, pause=0.001,
-                  src='sn'):
+def get_tick_data(code=None, date=None, retry_count=3, pause=0.001, src='tt'):
     """
         获取分笔数据
     Parameters
